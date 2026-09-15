@@ -67,6 +67,7 @@ def calculate_mape(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 
+# --- Evaluasi performa model pada skala Rupiah asli (R2, MAE, RMSE, MAPE) ---
 def evaluate_model(model, X_test, y_test, is_log_target=True):
     """Menghitung metrik performa model pada data uji."""
     preds = model.predict(X_test)
@@ -88,6 +89,7 @@ def run_experiments():
     df_dengan = pd.read_csv(os.path.join(DATA_DIR, "dataset_dengan_fe.csv"))
 
     y = df_dengan["harga"]
+    # --- Log transform target (np.log1p) untuk menstabilkan variansi harga ---
     y_log = np.log1p(y)
 
     num_cols_base = [
@@ -105,6 +107,7 @@ def run_experiments():
         ("cat", OneHotEncoder(handle_unknown="ignore"), ["furnished", "kecamatan"])
     ])
 
+    # --- Train-test split (80% train, 20% test) ---
     idx_train, idx_test = train_test_split(np.arange(len(df_dengan)), test_size=0.20, random_state=42)
     y_train, y_test = y.iloc[idx_train], y.iloc[idx_test]
     y_log_train = y_log.iloc[idx_train]
@@ -127,6 +130,7 @@ def run_experiments():
         "xgb__colsample_bytree": [0.8, 1.0]
     }
 
+    # --- Definisi 4 skenario ablation study (Random Forest vs XGBoost) ---
     scenarios = [
         ("Random Forest", "Tanpa FE (Baseline)", prep_tanpa, df_tanpa, "rf",
          RandomForestRegressor(random_state=42, n_jobs=-1), rf_dist),
@@ -143,7 +147,7 @@ def run_experiments():
     for model_name, scen_name, prep, df_src, prefix, estimator, dist in scenarios:
         pipe = Pipeline([("prep", prep), (prefix, estimator)])
 
-        # Step 1: Coarse Search via RandomizedSearchCV
+        # --- Tahap 1: Pencarian kasar (coarse search) via RandomizedSearchCV ---
         rand = RandomizedSearchCV(
             pipe, dist, n_iter=8, cv=cv, scoring="neg_mean_squared_error",
             random_state=42, n_jobs=-1
@@ -151,7 +155,7 @@ def run_experiments():
         rand.fit(df_src.iloc[idx_train], y_log_train)
         bp = rand.best_params_
 
-        # Step 2: Fine Tuning via GridSearchCV di sekitar kandidat terbaik
+        # --- Tahap 2: Pencarian presisi (fine tuning) di sekitar kandidat terbaik ---
         grid_params = build_grid_around(bp, prefix)
         grid = GridSearchCV(pipe, grid_params, cv=cv, scoring="neg_mean_squared_error", n_jobs=-1)
         grid.fit(df_src.iloc[idx_train], y_log_train)
@@ -166,7 +170,7 @@ def run_experiments():
         if model_name == "XGBoost" and scen_name == "DENGAN Feature Engineering":
             best_xgb_model = fitted_model
 
-    # Export model terbaik
+    # --- Ekspor model terbaik (.joblib), feature importance, dan hasil eksperimen ---
     if best_xgb_model:
         joblib.dump(best_xgb_model, os.path.join(OUTPUT_DIR, "model_terbaik.joblib"))
 

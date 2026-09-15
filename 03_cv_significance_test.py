@@ -25,6 +25,7 @@ def run_cv_significance_test():
     y = df_dengan["harga"]
     y_log = np.log1p(y)
 
+    # --- Load hyperparameter terbaik hasil tuning dari best_hyperparameters.json ---
     with open(os.path.join(OUTPUT_DIR, "best_hyperparameters.json"), "r", encoding="utf-8") as f:
         best_params = json.load(f)
 
@@ -43,6 +44,7 @@ def run_cv_significance_test():
         ("cat", OneHotEncoder(handle_unknown="ignore"), ["furnished", "kecamatan"])
     ])
 
+    # --- Setup Repeated K-Fold Cross Validation (5 splits x 10 repeats = 50 folds) ---
     rkf = RepeatedKFold(n_splits=5, n_repeats=10, random_state=42)
     n_folds = rkf.get_n_splits()
     print(f"Menjalankan Repeated K-Fold Cross Validation (5-Fold, 10 Repeats = {n_folds} Folds)...")
@@ -80,7 +82,7 @@ def run_cv_significance_test():
         }
     }
 
-    # Evaluasi pada tiap fold
+    # --- Loop cross-validation per fold untuk menguji model dengan vs tanpa FE ---
     fold_idx = 1
     for train_idx, test_idx in rkf.split(df_dengan):
         y_train_log = y_log.iloc[train_idx]
@@ -115,7 +117,7 @@ def run_cv_significance_test():
         mean_tanpa, std_tanpa = np.mean(arr_tanpa), np.std(arr_tanpa)
         mean_dengan, std_dengan = np.mean(arr_dengan), np.std(arr_dengan)
 
-        # Paired t-test
+        # --- Hitung statistik paired t-test dan kesimpulan signifikansi (alpha = 0.05) ---
         t_stat, p_val = stats.ttest_rel(arr_dengan, arr_tanpa)
         is_sig = p_val < 0.05
         kesimpulan = "Signifikan (p < 0.05)" if is_sig else "Tidak Signifikan (p >= 0.05)"

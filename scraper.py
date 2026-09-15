@@ -26,6 +26,7 @@ logger = logging.getLogger("ScraperRumah123")
 BASE_URL = "https://www.rumah123.com/jual/surabaya/rumah/"
 SOURCE_TAG = "rumah123"
 
+# --- Setup konfigurasi dan schema kolom data ---
 CSV_COLUMNS = [
     "judul_listing",
     "harga",
@@ -46,6 +47,7 @@ CSV_COLUMNS = [
 ]
 
 
+# --- Helper fungsi pembersihan dan ekstraksi atribut listing ---
 def parse_price(price_obj):
     """Mengekstrak harga dalam satuan Rupiah integer dari objek harga atau teks display."""
     if not price_obj:
@@ -260,6 +262,7 @@ def run_scraper(target_count=3500, delay_min=3.5, delay_max=6.5, headless=True):
 
     stealth = Stealth()
 
+    # --- Setup browser Playwright dengan modul stealth ---
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=headless,
@@ -274,6 +277,7 @@ def run_scraper(target_count=3500, delay_min=3.5, delay_max=6.5, headless=True):
         stealth.apply_stealth_sync(page)
 
         try:
+            # --- Loop scraping per halaman dan ekstraksi listing ---
             while total_valid < target_count and current_page <= max_pages:
                 page_url = f"{BASE_URL}?page={current_page}"
                 logger.info(f"Memproses halaman {current_page}: {page_url}")
@@ -321,6 +325,7 @@ def run_scraper(target_count=3500, delay_min=3.5, delay_max=6.5, headless=True):
                     if total_valid >= target_count:
                         break
 
+                # --- Penyimpanan hasil scraping secara bertahap ke CSV ---
                 if page_rows:
                     batch_df = pd.DataFrame(page_rows)[CSV_COLUMNS]
                     file_exists = os.path.exists(output_csv)

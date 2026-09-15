@@ -102,13 +102,14 @@ def map_text_to_kecamatan(text):
 
 def run_preprocessing():
     """Menggabungkan data, melakukan pembersihan, dan menghitung fitur rekayasa."""
+    # --- Tahap 1: Load dan gabungkan data mentah Rumah123 dan broker developer ---
     df_scrape = pd.read_csv(os.path.join(DATA_DIR, "rumah123_surabaya_raw_2026-09-14.csv"))
     df_broker = pd.read_csv(os.path.join(DATA_DIR, "data_broker_surabaya_raw.csv"))
 
     df = pd.concat([df_scrape, df_broker], ignore_index=True)
     df = df.drop_duplicates(subset=["url_listing"])
 
-    # Filtering data valid
+    # --- Tahap 2: Data cleaning dan filtering anomali (harga wajar dan luas fisik) ---
     df = df[(df["harga"] >= 150_000_000) & (df["harga"] <= 100_000_000_000)]
     df = df[(df["luas_tanah"] >= 20.0) & (df["luas_tanah"] <= 5000.0)]
     df = df[(df["luas_bangunan"] >= 20.0) & (df["luas_bangunan"] <= 5000.0)]
@@ -121,7 +122,7 @@ def run_preprocessing():
     df["carport"] = df["carport"].fillna(1).astype(int)
     df["furnished"] = df["furnished"].fillna("Unfurnished")
 
-    # Pemetaan Kecamatan
+    # --- Tahap 3 (FE 1): Pemetaan dan standardisasi ke 31 kecamatan resmi Surabaya ---
     kecamatan_list = []
     for _, row in df.iterrows():
         kec = map_text_to_kecamatan(f"{row['alamat_teks']} {row['judul_listing']}")
@@ -130,10 +131,13 @@ def run_preprocessing():
         kecamatan_list.append(kec or "Sukolilo")
     df["kecamatan"] = kecamatan_list
 
-    # Feature Engineering
+    # --- Tahap 4 (FE 2): Pembuatan fitur rasio luas bangunan terhadap luas tanah ---
     df["rasio_bangunan_tanah"] = (df["luas_bangunan"] / df["luas_tanah"]).round(2)
+
+    # --- Tahap 5 (FE 3): Pembuatan fitur total ruangan inti (kamar tidur + kamar mandi) ---
     df["total_ruangan"] = df["kamar_tidur"] + df["kamar_mandi"]
 
+    # --- Tahap 6 (FE 4): Pembuatan fitur jarak ke pusat kota Surabaya (rumus Haversine) ---
     jarak_list = []
     for _, row in df.iterrows():
         lat, lon, kec = row["latitude"], row["longitude"], row["kecamatan"]
@@ -145,7 +149,7 @@ def run_preprocessing():
         jarak_list.append(d)
     df["jarak_ke_pusat_kota"] = jarak_list
 
-    # Export Baseline Dataset (Tanpa FE)
+    # --- Tahap 7: Ekspor dataset baseline tanpa feature engineering (15 kolom) ---
     cols_tanpa = [
         "judul_listing", "harga", "luas_tanah", "luas_bangunan", "kamar_tidur",
         "kamar_mandi", "lantai", "carport", "furnished", "keamanan", "taman",
@@ -153,7 +157,7 @@ def run_preprocessing():
     ]
     df[cols_tanpa].to_csv(os.path.join(DATA_DIR, "dataset_tanpa_fe.csv"), index=False)
 
-    # Export Full Dataset (Dengan FE)
+    # --- Tahap 8: Ekspor dataset lengkap dengan feature engineering (19 kolom) ---
     cols_dengan = [
         "judul_listing", "harga", "luas_tanah", "luas_bangunan", "kamar_tidur",
         "kamar_mandi", "lantai", "carport", "furnished", "keamanan", "taman",
