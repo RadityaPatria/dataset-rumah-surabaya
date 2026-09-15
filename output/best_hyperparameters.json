@@ -1,28 +1,28 @@
 {
-  "Random_Forest_Tanpa_FE": {
-    "max_depth": 20,
+  "Random_Forest_Tanpa_FE_(Baseline)": {
+    "max_depth": 19,
     "min_samples_leaf": 1,
     "min_samples_split": 9,
     "n_estimators": 200
   },
-  "Random_Forest_Dengan_FE": {
-    "max_depth": null,
+  "Random_Forest_DENGAN_Feature_Engineering": {
+    "max_depth": 19,
     "min_samples_leaf": 1,
     "min_samples_split": 9,
-    "n_estimators": 150
+    "n_estimators": 225
   },
-  "XGBoost_Tanpa_FE": {
-    "colsample_bytree": 1.0,
-    "learning_rate": 0.02,
-    "max_depth": 8,
-    "n_estimators": 250,
-    "subsample": 0.8
+  "XGBoost_Tanpa_FE_(Baseline)": {
+    "colsample_bytree": 0.95,
+    "learning_rate": 0.03,
+    "max_depth": 7,
+    "n_estimators": 275,
+    "subsample": 0.75
   },
-  "XGBoost_Dengan_FE": {
+  "XGBoost_DENGAN_Feature_Engineering": {
     "colsample_bytree": 1.0,
-    "learning_rate": 0.05,
-    "max_depth": 8,
+    "learning_rate": 0.04,
+    "max_depth": 7,
     "n_estimators": 300,
-    "subsample": 0.8
+    "subsample": 0.75
   }
 }

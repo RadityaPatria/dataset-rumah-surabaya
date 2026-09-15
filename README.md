@@ -74,14 +74,14 @@ Hasil pengujian pada data uji (*Test Set* 20%) setelah melalui Hyperparameter Tu
 
 | Model | Skenario Fitur | R² Score | MAE (Juta Rp) | RMSE (Juta Rp) | MAPE (%) | Keterangan |
 |---|---|:---:|:---:|:---:|:---:|---|
-| **Random Forest** | Tanpa FE (Baseline) | 0.7338 | Rp 1.689,60 | Rp 4.936,81 | 28.78% | Baseline Model |
-| **Random Forest** | DENGAN FE | 0.7246 | Rp 1.668,96 | Rp 5.021,80 | 28.22% | Evaluasi Pembanding |
-| **XGBoost** | Tanpa FE (Baseline) | 0.7598 | Rp 1.645,67 | Rp 4.689,48 | 28.50% | XGBoost Standar |
-| **XGBoost** | **DENGAN FE** | **0.7679** | **Rp 1.568,07** | **Rp 4.610,26** | **26.67%** | 🏆 **Model Terbaik Skripsi** |
+| **Random Forest** | Tanpa FE (Baseline) | 0.7343 | Rp 1.688,57 | Rp 4.932,39 | 28.78% | Baseline Model |
+| **Random Forest** | DENGAN FE | 0.7234 | Rp 1.671,34 | Rp 5.032,66 | 28.34% | Evaluasi Pembanding |
+| **XGBoost** | Tanpa FE (Baseline) | 0.7572 | Rp 1.640,96 | Rp 4.715,32 | 28.28% | XGBoost Standar |
+| **XGBoost** | **DENGAN FE** | **0.7660** | **Rp 1.571,29** | **Rp 4.628,49** | **26.52%** | 🏆 **Model Terbaik Skripsi** |
 
 ### Kesimpulan Ilmiah:
-1. **Keunggulan XGBoost**: Algoritma XGBoost terbukti mengungguli Random Forest di seluruh metrik evaluasi (R² lebih tinggi 0.0433, MAE lebih hemat Rp 100+ Juta).
-2. **Pengaruh Nyata Feature Engineering**: Penambahan 4 fitur rekayasa berhasil menaikkan nilai R² XGBoost dari **0.7598 menjadi 0.7679**, serta memangkas rata-rata selisih kesalahan prediksi (MAE) sebesar **Rp 77,6 Juta per rumah**.
+1. **Keunggulan XGBoost**: Algoritma XGBoost terbukti mengungguli Random Forest di seluruh metrik evaluasi (R² lebih tinggi 0.0426, MAE lebih hemat Rp 100+ Juta).
+2. **Pengaruh Nyata Feature Engineering**: Penambahan 4 fitur rekayasa berhasil menaikkan nilai R² XGBoost dari **0.7572 menjadi 0.7660**, memangkas rata-rata selisih kesalahan prediksi (MAE) sebesar **Rp 69,67 Juta per rumah**, dan menurunkan tingkat persentase kesalahan (MAPE) ke level terendah **26.52%**.
 
 ## 🔬 Uji Signifikansi Statistik (Repeated Cross-Validation)
 
@@ -89,13 +89,13 @@ Untuk menguji keabsahan bahwa peningkatan performa dari *Feature Engineering* bu
 
 | Model | R² Tanpa FE (Mean ± Std) | R² Dengan FE (Mean ± Std) | t-Statistic | p-Value | Kesimpulan Statistik |
 |---|:---:|:---:|:---:|:---:|---|
-| **Random Forest** | 0.7585 ± 0.0369 | 0.7658 ± 0.0364 | 4.4988 | 4.2092e-05 | **Signifikan** ($p < 0.05$) |
-| **XGBoost** | 0.7745 ± 0.0370 | **0.7895 ± 0.0375** | 5.5133 | 1.3031e-06 | **Signifikan** ($p < 0.05$) |
+| **Random Forest** | 0.7583 ± 0.0370 | 0.7657 ± 0.0368 | 4.5765 | 3.2492e-05 | **Signifikan** ($p < 0.05$) |
+| **XGBoost** | 0.7813 ± 0.0359 | **0.7911 ± 0.0371** | 3.6243 | 6.8786e-04 | **Signifikan** ($p < 0.05$) |
 
 ### Interpretasi Hasil:
-1. **P-Value Sangat Kecil ($p < 0.0001$)**: Nilai $p$-value untuk kedua model jauh di bawah batas signifikansi 0.05. Hal ini membuktikan secara ilmiah bahwa penambahan 4 fitur rekayasa secara konsisten dan signifikan meningkatkan performa prediksi harga rumah.
-2. **Stabilitas Model**: Standar deviasi yang relatif rendah (~0.037) di seluruh 50 fold membuktikan kedua model memiliki generalisasi yang stabil dan tahan terhadap variasi sampel data.
-3. **XGBoost Tetap Unggul**: Model XGBoost dengan Feature Engineering menghasilkan rata-rata $R^2$ tertinggi ($0.7895$), mempertegas posisinya sebagai model terbaik dalam penelitian ini.
+1. **P-Value Signifikan ($p < 0.001$)**: Nilai $p$-value untuk kedua model jauh di bawah batas signifikansi 0.05 ($p = 0.000688$ untuk XGBoost dan $p = 0.000032$ untuk RF). Hal ini membuktikan secara ilmiah bahwa penambahan 4 fitur rekayasa secara konsisten dan signifikan meningkatkan performa prediksi harga rumah.
+2. **Stabilitas Model**: Standar deviasi yang relatif rendah (~0.036 - 0.037) di seluruh 50 fold membuktikan kedua model memiliki generalisasi yang stabil dan tahan terhadap variasi sampel data.
+3. **XGBoost Tetap Unggul**: Model XGBoost dengan Feature Engineering menghasilkan rata-rata $R^2$ tertinggi ($0.7911$), mempertegas posisinya sebagai model terbaik dalam penelitian ini.
 
 ---
 
@@ -105,16 +105,16 @@ Berdasarkan bobot kepentingan fitur (*Feature Importance*) dari model XGBoost te
 
 | Rank | Nama Fitur | Importance (%) |
 |:---:|---|:---:|
-| 1 | `luas_tanah` | 16.73% |
-| 2 | `kamar_mandi` | 10.54% |
-| 3 | `luas_bangunan` | 8.96% |
-| 4 | `total_ruangan` | 5.04% |
-| 5 | `kecamatan_Pakal` | 3.90% |
-| 6 | `kecamatan_Simokerto` | 3.15% |
-| 7 | `kecamatan_Rungkut` | 3.08% |
-| 8 | `kecamatan_Asemrowo` | 3.01% |
-| 9 | `kecamatan_Mulyorejo` | 2.72% |
-| 10 | `kecamatan_Tenggilis Mejoyo` | 2.24% |
+| 1 | `luas_tanah` | 16.86% |
+| 2 | `luas_bangunan` | 13.41% |
+| 3 | `kamar_mandi` | 9.31% |
+| 4 | `total_ruangan` | 5.43% |
+| 5 | `kecamatan_Asemrowo` | 4.68% |
+| 6 | `kecamatan_Pakal` | 3.46% |
+| 7 | `kecamatan_Mulyorejo` | 2.89% |
+| 8 | `kecamatan_Rungkut` | 2.57% |
+| 9 | `kecamatan_Tenggilis Mejoyo` | 2.46% |
+| 10 | `kecamatan_Wonokromo` | 1.88% |
 
 ---
 

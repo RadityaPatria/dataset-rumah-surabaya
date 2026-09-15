@@ -14,6 +14,53 @@ from xgboost import XGBRegressor
 DATA_DIR = "data"
 OUTPUT_DIR = "output"
 
+PARAM_SPECS = {
+    "n_estimators": {"step": 25, "min": 50, "max": None, "type": int},
+    "max_depth": {"step": 1, "min": 1, "max": None, "type": int},
+    "min_samples_split": {"step": 1, "min": 2, "max": None, "type": int},
+    "min_samples_leaf": {"step": 1, "min": 1, "max": None, "type": int},
+    "learning_rate": {"step": 0.01, "min": 0.01, "max": None, "type": float, "decimals": 3},
+    "subsample": {"step": 0.05, "min": 0.5, "max": 1.0, "type": float, "decimals": 2},
+    "colsample_bytree": {"step": 0.05, "min": 0.5, "max": 1.0, "type": float, "decimals": 2},
+}
+
+
+def build_grid_around(best_params, prefix, param_specs=PARAM_SPECS):
+    """Membuat grid_params variasi di sekitar kandidat terbaik RandomizedSearchCV (coarse-to-fine search)."""
+    grid = {}
+    for key, val in best_params.items():
+        clean_name = key.replace(f"{prefix}__", "")
+        if val is None:
+            grid[key] = [None]
+        elif clean_name in param_specs:
+            spec = param_specs[clean_name]
+            step = spec["step"]
+            min_val = spec.get("min")
+            max_val = spec.get("max")
+
+            if spec["type"] == int:
+                candidates = [val - step, val, val + step]
+                if min_val is not None:
+                    candidates = [max(min_val, c) for c in candidates]
+                if max_val is not None:
+                    candidates = [min(max_val, c) for c in candidates]
+                grid[key] = sorted(list(set(candidates)))
+            else:
+                decimals = spec.get("decimals", 2)
+                candidates = [
+                    round(val - step, decimals),
+                    round(val, decimals),
+                    round(val + step, decimals)
+                ]
+                if min_val is not None:
+                    candidates = [max(min_val, c) for c in candidates]
+                if max_val is not None:
+                    candidates = [min(max_val, c) for c in candidates]
+                grid[key] = sorted(list(set(candidates)))
+        else:
+            grid[key] = [val]
+    return grid
+
 
 def calculate_mape(y_true, y_pred):
     """Menghitung Mean Absolute Percentage Error (%)."""
@@ -34,7 +81,7 @@ def evaluate_model(model, X_test, y_test, is_log_target=True):
 
 
 def run_experiments():
-    """Menjalankan ablation study dan hyperparameter tuning untuk Random Forest dan XGBoost."""
+    """Menjalankan ablation study dan coarse-to-fine hyperparameter tuning untuk Random Forest dan XGBoost."""
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     df_tanpa = pd.read_csv(os.path.join(DATA_DIR, "dataset_tanpa_fe.csv"))
@@ -66,7 +113,6 @@ def run_experiments():
     results = []
     best_params = {}
 
-    # Ruang hyperparameter
     rf_dist = {
         "rf__n_estimators": [100, 150, 200, 250],
         "rf__max_depth": [10, 15, 20, None],
@@ -97,18 +143,16 @@ def run_experiments():
     for model_name, scen_name, prep, df_src, prefix, estimator, dist in scenarios:
         pipe = Pipeline([("prep", prep), (prefix, estimator)])
 
-        # Coarse search
-        rand = RandomizedSearchCV(pipe, dist, n_iter=8, cv=cv, scoring="neg_mean_squared_error",
-                                  random_state=42, n_jobs=-1)
+        # Step 1: Coarse Search via RandomizedSearchCV
+        rand = RandomizedSearchCV(
+            pipe, dist, n_iter=8, cv=cv, scoring="neg_mean_squared_error",
+            random_state=42, n_jobs=-1
+        )
         rand.fit(df_src.iloc[idx_train], y_log_train)
         bp = rand.best_params_
 
-        # Fine tuning
-        grid_params = {k: [v] for k, v in bp.items()}
-        if f"{prefix}__min_samples_split" in bp:
-            grid_params[f"{prefix}__min_samples_split"] = [bp[f"{prefix}__min_samples_split"],
-                                                           max(2, bp[f"{prefix}__min_samples_split"] - 1)]
-
+        # Step 2: Fine Tuning via GridSearchCV di sekitar kandidat terbaik
+        grid_params = build_grid_around(bp, prefix)
         grid = GridSearchCV(pipe, grid_params, cv=cv, scoring="neg_mean_squared_error", n_jobs=-1)
         grid.fit(df_src.iloc[idx_train], y_log_train)
 
@@ -122,7 +166,7 @@ def run_experiments():
         if model_name == "XGBoost" and scen_name == "DENGAN Feature Engineering":
             best_xgb_model = fitted_model
 
-    # Export artefak model
+    # Export model terbaik
     if best_xgb_model:
         joblib.dump(best_xgb_model, os.path.join(OUTPUT_DIR, "model_terbaik.joblib"))
 

@@ -48,10 +48,10 @@ def run_cv_significance_test():
     print(f"Menjalankan Repeated K-Fold Cross Validation (5-Fold, 10 Repeats = {n_folds} Folds)...")
 
     # Inisialisasi model dari hyperparameter terbaik
-    xgb_tanpa_params = best_params.get("XGBoost_Tanpa_FE", {})
-    xgb_dengan_params = best_params.get("XGBoost_Dengan_FE", {})
-    rf_tanpa_params = best_params.get("Random_Forest_Tanpa_FE", {})
-    rf_dengan_params = best_params.get("Random_Forest_Dengan_FE", {})
+    xgb_tanpa_params = best_params.get("XGBoost_Tanpa_FE_(Baseline)") or best_params.get("XGBoost_Tanpa_FE", {})
+    xgb_dengan_params = best_params.get("XGBoost_DENGAN_Feature_Engineering") or best_params.get("XGBoost_Dengan_FE", {})
+    rf_tanpa_params = best_params.get("Random_Forest_Tanpa_FE_(Baseline)") or best_params.get("Random_Forest_Tanpa_FE", {})
+    rf_dengan_params = best_params.get("Random_Forest_DENGAN_Feature_Engineering") or best_params.get("Random_Forest_Dengan_FE", {})
 
     models = {
         "XGBoost": {
