@@ -1,0 +1,31 @@
+judul_listing,harga,luas_tanah,luas_bangunan,kamar_tidur,kamar_mandi,lantai,carport,furnished,keamanan,taman,alamat_teks,latitude,longitude,url_listing,sumber_data
+Pantai Mentari Tipe Arden (5x10),1100000000,50.0,55.0,2,1,2,1,Unfurnished,1,1,"Pantai Mentari, Kenjeran, Surabaya",-7.23415,112.7986,pk_broker_pantai_mentari_arden,broker_pantai_mentari
+Pantai Mentari Tipe Arden A (5x12),1400000000,60.0,68.0,3,2,2,1,Unfurnished,1,1,"Pantai Mentari, Kenjeran, Surabaya",-7.23415,112.7986,pk_broker_pantai_mentari_arden_a,broker_pantai_mentari
+Pantai Mentari Tipe Arden B (7x10),1700000000,70.0,82.0,4,3,2,1,Unfurnished,1,1,"Pantai Mentari, Kenjeran, Surabaya",-7.23415,112.7986,pk_broker_pantai_mentari_arden_b,broker_pantai_mentari
+Pantai Mentari Tipe Ashdale (5x12),1500000000,60.0,82.0,4,3,2,1,Unfurnished,1,1,"Pantai Mentari, Kenjeran, Surabaya",-7.23415,112.7986,pk_broker_pantai_mentari_ashdale,broker_pantai_mentari
+Pantai Mentari Tipe Ashdale A (5x13),1600000000,65.0,82.0,4,3,2,1,Unfurnished,1,1,"Pantai Mentari, Kenjeran, Surabaya",-7.23415,112.7986,pk_broker_pantai_mentari_ashdale_a,broker_pantai_mentari
+Pantai Mentari Tipe Ashdale B (5x18),2000000000,90.0,93.0,4,3,2,2,Unfurnished,1,1,"Pantai Mentari, Kenjeran, Surabaya",-7.23415,112.7986,pk_broker_pantai_mentari_ashdale_b,broker_pantai_mentari
+Pantai Mentari Tipe Ashdale C (7x12),2100000000,84.0,106.0,4,3,2,2,Unfurnished,1,1,"Pantai Mentari, Kenjeran, Surabaya",-7.23415,112.7986,pk_broker_pantai_mentari_ashdale_c,broker_pantai_mentari
+Pantai Mentari Tipe Abbington (6x15),2300000000,90.0,123.0,5,3,2,2,Unfurnished,1,1,"Pantai Mentari, Kenjeran, Surabaya",-7.23415,112.7986,pk_broker_pantai_mentari_abbington,broker_pantai_mentari
+Pantai Mentari Tipe Abbington A Sudut (Hook),3000000000,145.0,128.0,5,3,2,2,Unfurnished,1,1,"Pantai Mentari, Kenjeran, Surabaya",-7.23415,112.7986,pk_broker_pantai_mentari_abbington_a,broker_pantai_mentari
+Grand Alana Wonorejo Tipe Mezzanine 28/27,429000000,27.0,28.0,1,1,2,1,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.3156,112.8021,pk_broker_grand_alana_mezzanine_28,broker_grand_alana
+Grand Alana Wonorejo Tipe Mezzanine 31/27,429000000,27.0,31.0,2,1,2,1,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.3156,112.8021,pk_broker_grand_alana_mezzanine_31,broker_grand_alana
+Grand Alana Wonorejo Tipe 30/50 1 Lantai,628000000,50.0,30.0,2,1,1,1,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.3156,112.8021,pk_broker_grand_alana_30_50,broker_grand_alana
+Grand Alana Wonorejo Tipe 48/50 2 Lantai,728000000,50.0,48.0,2,2,2,1,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.3156,112.8021,pk_broker_grand_alana_48_50,broker_grand_alana
+Grand Alana Wonorejo Tipe 66/60 (5x12),895000000,60.0,66.0,3,2,2,1,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.3156,112.8021,pk_broker_grand_alana_66_60_5x12,broker_grand_alana
+Grand Alana Wonorejo Tipe 66/60 (6x10),895000000,60.0,66.0,3,2,2,1,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.3156,112.8021,pk_broker_grand_alana_66_60_6x10,broker_grand_alana
+Park Sunrise Tahap 3 Tipe 5x7 (51/35),741822000,35.0,51.0,2,2,2,1,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.318,112.805,pk_broker_park_sunrise_5x7,broker_park_sunrise
+Park Sunrise Tahap 3 Tipe 5x10 (63/50),923214000,50.0,63.0,3,2,2,1,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.318,112.805,pk_broker_park_sunrise_5x10,broker_park_sunrise
+Park Sunrise Tahap 3 Tipe 5x12 (73/60),1093771000,60.0,73.0,3,2,2,1,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.318,112.805,pk_broker_park_sunrise_5x12,broker_park_sunrise
+Park Sunrise Tahap 3 Tipe 6x10 (77/60),1115441000,60.0,77.0,3,2,2,1,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.318,112.805,pk_broker_park_sunrise_6x10,broker_park_sunrise
+Park Sunrise Tahap 3 Tipe 6x12 (96/72),1358033000,72.0,96.0,3,2,2,2,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.318,112.805,pk_broker_park_sunrise_6x12,broker_park_sunrise
+Park Sunrise Tahap 3 Tipe 7x12 Boulevard (119/84),1426908000,84.0,119.0,3,2,2,2,Unfurnished,1,1,"Wonorejo, Rungkut, Surabaya",-7.318,112.805,pk_broker_park_sunrise_7x12,broker_park_sunrise
+Grand Eastern Sukolilo Tipe 5x10 (65/50),1080000000,50.0,65.0,2,2,2,1,Unfurnished,1,1,"Keputih, Sukolilo, Surabaya",-7.2912,112.8054,pk_broker_grand_eastern_5x10,broker_grand_eastern
+Grand Eastern Sukolilo Tipe 5x12 (75/60),1250000000,60.0,75.0,3,2,2,1,Unfurnished,1,1,"Keputih, Sukolilo, Surabaya",-7.2912,112.8054,pk_broker_grand_eastern_5x12,broker_grand_eastern
+Grand Eastern Sukolilo Tipe 6x12 Attic (92/72),1550000000,72.0,92.0,3,2,2,2,Unfurnished,1,1,"Keputih, Sukolilo, Surabaya",-7.2912,112.8054,pk_broker_grand_eastern_6x12_attic,broker_grand_eastern
+Grand Eastern Sukolilo Tipe 7x12 (110/84),1890000000,84.0,110.0,4,3,2,2,Unfurnished,1,1,"Keputih, Sukolilo, Surabaya",-7.2912,112.8054,pk_broker_grand_eastern_7x12,broker_grand_eastern
+Royal Residence Phase 2 Tipe Oakwood (60/72),1450000000,72.0,60.0,2,2,2,1,Unfurnished,1,1,"Wiyung, Surabaya",-7.315,112.685,pk_broker_royal_residence_oakwood,broker_royal_residence
+Royal Residence Phase 2 Tipe Greenwich (120/105),2450000000,105.0,120.0,3,3,2,2,Unfurnished,1,1,"Wiyung, Surabaya",-7.315,112.685,pk_broker_royal_residence_greenwich,broker_royal_residence
+Royal Residence Phase 2 Tipe Hampton (145/120),2950000000,120.0,145.0,4,3,2,2,Unfurnished,1,1,"Wiyung, Surabaya",-7.315,112.685,pk_broker_royal_residence_hampton,broker_royal_residence
+Royal Residence Phase 2 Tipe Buckingham (190/162),3850000000,162.0,190.0,4,4,2,2,Unfurnished,1,1,"Wiyung, Surabaya",-7.315,112.685,pk_broker_royal_residence_buckingham,broker_royal_residence
+Royal Residence Phase 2 Tipe Jadine Grand (250/200),4950000000,200.0,250.0,5,5,2,2,Unfurnished,1,1,"Wiyung, Surabaya",-7.315,112.685,pk_broker_royal_residence_jadine,broker_royal_residence

@@ -1,0 +1,28 @@
+{
+  "Random_Forest_Tanpa_FE": {
+    "max_depth": 20,
+    "min_samples_leaf": 1,
+    "min_samples_split": 9,
+    "n_estimators": 200
+  },
+  "Random_Forest_Dengan_FE": {
+    "max_depth": null,
+    "min_samples_leaf": 1,
+    "min_samples_split": 9,
+    "n_estimators": 150
+  },
+  "XGBoost_Tanpa_FE": {
+    "colsample_bytree": 1.0,
+    "learning_rate": 0.02,
+    "max_depth": 8,
+    "n_estimators": 250,
+    "subsample": 0.8
+  },
+  "XGBoost_Dengan_FE": {
+    "colsample_bytree": 1.0,
+    "learning_rate": 0.05,
+    "max_depth": 8,
+    "n_estimators": 300,
+    "subsample": 0.8
+  }
+}
