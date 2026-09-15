@@ -83,55 +83,38 @@ Hasil pengujian pada data uji (*Test Set* 20%) setelah melalui Hyperparameter Tu
 1. **Keunggulan XGBoost**: Algoritma XGBoost terbukti mengungguli Random Forest di seluruh metrik evaluasi (R² lebih tinggi 0.0433, MAE lebih hemat Rp 100+ Juta).
 2. **Pengaruh Nyata Feature Engineering**: Penambahan 4 fitur rekayasa berhasil menaikkan nilai R² XGBoost dari **0.7598 menjadi 0.7679**, serta memangkas rata-rata selisih kesalahan prediksi (MAE) sebesar **Rp 77,6 Juta per rumah**.
 
+## 🔬 Uji Signifikansi Statistik (Repeated Cross-Validation)
+
+Untuk menguji keabsahan bahwa peningkatan performa dari *Feature Engineering* bukan karena kebetulan (*chance*), dilakukan pengujian **Repeated K-Fold Cross Validation** (5-Fold $\times$ 10 Repeats = 50 Folds) yang dilanjutkan dengan uji beda berpasangan (**Paired t-test** pada $\alpha = 0.05$):
+
+| Model | R² Tanpa FE (Mean ± Std) | R² Dengan FE (Mean ± Std) | t-Statistic | p-Value | Kesimpulan Statistik |
+|---|:---:|:---:|:---:|:---:|---|
+| **Random Forest** | 0.7585 ± 0.0369 | 0.7658 ± 0.0364 | 4.4988 | 4.2092e-05 | **Signifikan** ($p < 0.05$) |
+| **XGBoost** | 0.7745 ± 0.0370 | **0.7895 ± 0.0375** | 5.5133 | 1.3031e-06 | **Signifikan** ($p < 0.05$) |
+
+### Interpretasi Hasil:
+1. **P-Value Sangat Kecil ($p < 0.0001$)**: Nilai $p$-value untuk kedua model jauh di bawah batas signifikansi 0.05. Hal ini membuktikan secara ilmiah bahwa penambahan 4 fitur rekayasa secara konsisten dan signifikan meningkatkan performa prediksi harga rumah.
+2. **Stabilitas Model**: Standar deviasi yang relatif rendah (~0.037) di seluruh 50 fold membuktikan kedua model memiliki generalisasi yang stabil dan tahan terhadap variasi sampel data.
+3. **XGBoost Tetap Unggul**: Model XGBoost dengan Feature Engineering menghasilkan rata-rata $R^2$ tertinggi ($0.7895$), mempertegas posisinya sebagai model terbaik dalam penelitian ini.
+
 ---
 
 ## 🎯 Top 10 Fitur Paling Menentukan Harga Rumah (Feature Importance)
 
-Dari bobot keputusan pohon XGBoost terbaik (`feature_importance_xgboost.csv`):
-1. **`luas_tanah`** (16.73%) – Faktor fisik tanah paling dominan.
-2. **`kamar_mandi`** (10.54%) – Indikator kelas kemewahan spesifikasi rumah.
-3. **`luas_bangunan`** (8.96%) – Luas fisik bangunan hunian.
-4. **`total_ruangan`** (5.04%) – **Fitur Rekayasa (FE)** yang masuk 4 besar faktor terpenting!
-5. **Faktor Wilayah/Lokasi**: `kecamatan_Pakal`, `kecamatan_Simokerto`, `kecamatan_Rungkut`, `kecamatan_Asemrowo`, dan `jarak_ke_pusat_kota`.
+Berdasarkan bobot kepentingan fitur (*Feature Importance*) dari model XGBoost terbaik (`output/feature_importance_xgboost.csv`):
 
----
-
-## 🎓 CHEAT SHEET SEMINAR PROPOSAL (TANYA - JAWAB DOSEN)
-
-Gunakan contekan jawaban santai, runtut, dan ilmiah ini saat ditanya oleh dosen pembimbing maupun dosen penguji:
-
-### 1. "Mas Radit, kenapa membandingkan XGBoost dengan Random Forest?"
-> **Jawaban:**  
-> "Keduanya sama-sama algoritma *Ensemble Tree* yang sangat kuat untuk data tabel properti. Namun cara kerjanya berbeda, Pak/Bu:  
-> - **Random Forest** bekerja secara *Bagging* (membangun banyak pohon secara independen lalu diambil voting/rata-ratanya).  
-> - **XGBoost** bekerja secara *Gradient Boosting* (pohon dibangun berurutan, di mana setiap pohon baru bertugas khusus memperbaiki kesalahan dari pohon sebelumnya).  
-> Di penelitian ini, saya ingin membuktikan secara empiris bahwa mekanisme *boosting* pada XGBoost lebih efektif menangani pola harga rumah di Surabaya."
-
-### 2. "Kenapa harus repot-repot bikin Feature Engineering?"
-> **Jawaban:**  
-> "Karena data mentah dari internet itu fiturnya sangat dasar (hanya luas tanah, bangunan, dan kamar). Padahal dalam dunia properti, **lokasi, zonasi, dan kepadatan bangunan** sangat menentukan harga.  
-> Dengan membuat fitur seperti jarak ke Balai Kota, rasio bangunan-tanah, dan nama kecamatan, kita memberi 'wawasan tambahan' kepada model Machine Learning sehingga ia bisa membedakan harga rumah di pusat kota vs area pinggiran secara lebih akurat."
-
-### 3. "Kenapa harga rumah di-log transform (`np.log1p`) saat latihan?"
-> **Jawaban:**  
-> "Harga rumah memiliki variansi yang sangat lebar (mulai Rp 200 juta sampai puluhan miliar), sehingga distribusinya menceng ke kanan (*right-skewed*). Jika langsung dilatihkan mentah-mentah, model akan bias dan terdistorsi oleh rumah-rumah yang kelewat mahal (*outlier*).  
-> Dengan fungsi logaritma, distribusinya dibuat lebih simetris menyerupai distribusi normal. Setelah prediksi selesai, nilainya kita kembalikan lagi ke Rupiah riil memakai fungsi inversi `np.expm1` agar metrik evaluasi (MAE & MAPE) tetap dalam satuan Rupiah asli."
-
-### 4. "Mengapa menggunakan rumus Haversine untuk menghitung jarak?"
-> **Jawaban:**  
-> "Rumus Haversine digunakan untuk menghitung jarak lingkaran besar (*great-circle distance*) antara dua titik koordinat GPS di permukaan bumi. Karena bumi itu bulat, kita tidak bisa memakai rumus jarak Euclidean biasa (Pythagoras) yang mengasumsikan bumi itu datar. Rumus Haversine memperhitungkan kelengkungan bumi dengan jari-jari rata-rata 6.371 km."
-
-### 5. "Apa bedanya RandomizedSearchCV dan GridSearchCV yang Mas pakai?"
-> **Jawaban:**  
-> "Sesuai metodologi pada Bab 3, saya menggunakan strategi *Coarse-to-Fine Search*:  
-> - Pertama, **RandomizedSearchCV** dipakai untuk eksplorasi cepat menjelajahi rentang parameter yang luas secara acak.  
-> - Kedua, setelah ditemukan kandidat parameter yang menjanjikan, **GridSearchCV** dipakai untuk menyisir secara presisi di sekitar angka terbaik tersebut dengan 5-Fold Cross Validation.  
-> Strategi ini menghemat waktu komputasi secara drastis tanpa mengorbankan kualitas akurasi model."
-
-### 6. "Mas kan masih Sempro (Bab 1–3), kenapa eksperimen modelnya sudah selesai dijalankan?"
-> **Jawaban:**  
-> "Sebagai mahasiswa D4 Teknik Informatika Vokasi yang berbasis terapan, saya ingin memastikan bahwa usulan penelitian saya **layak secara data dan teknis (*Feasibility Study*)**.  
-> Dengan menguji data riil dan pipeline model sejak awal, saya bisa membuktikan ke dosen bahwa rumusan masalah Bab 1 benar-benar dapat terjawab secara terukur, tidak berhenti pada hipotesis di atas kertas, dan siap dilanjutkan ke tahap implementasi aplikasi web untuk Bab 4."
+| Rank | Nama Fitur | Importance (%) |
+|:---:|---|:---:|
+| 1 | `luas_tanah` | 16.73% |
+| 2 | `kamar_mandi` | 10.54% |
+| 3 | `luas_bangunan` | 8.96% |
+| 4 | `total_ruangan` | 5.04% |
+| 5 | `kecamatan_Pakal` | 3.90% |
+| 6 | `kecamatan_Simokerto` | 3.15% |
+| 7 | `kecamatan_Rungkut` | 3.08% |
+| 8 | `kecamatan_Asemrowo` | 3.01% |
+| 9 | `kecamatan_Mulyorejo` | 2.72% |
+| 10 | `kecamatan_Tenggilis Mejoyo` | 2.24% |
 
 ---
 
@@ -142,6 +125,7 @@ DATASET-RUMAH/
 ├── scraper.py                 # Bot pengumpul data Rumah123 (Playwright Stealth)
 ├── 01_preprocessing.py        # Pembersih data, pemetaan kecamatan, dan rekayasa fitur
 ├── 02_model_experiment.py     # Tuning dan evaluasi model RF vs XGBoost (5-Fold CV)
+├── 03_cv_significance_test.py # Uji Repeated Cross-Validation & Paired t-test
 ├── README.md                  # Dokumentasi dan panduan lengkap
 │
 ├── data/                      # Seluruh berkas dataset mentah & olahan
@@ -155,6 +139,7 @@ DATASET-RUMAH/
 └── output/                    # Artefak hasil pelatihan & evaluasi model
     ├── model_terbaik.joblib                  # Model biner XGBoost juara untuk web app
     ├── tabel_hasil_eksperimen.csv            # Tabel perbandingan 4 skenario
+    ├── cv_significance_results.csv           # Hasil uji Repeated CV & t-test
     ├── feature_importance_xgboost.csv        # Peringkat faktor penentu harga
     └── best_hyperparameters.json             # Parameter optimal hasil tuning
 ```
@@ -173,5 +158,10 @@ Jika ingin mendemonstrasikan proses di depan dosen:
    ```bash
    python 02_model_experiment.py
    ```
+3. **Jalankan Uji Signifikansi Statistik (Repeated CV & Paired t-test)**:
+   ```bash
+   python 03_cv_significance_test.py
+   ```
 
 Semua script sudah dirancang otomatis dan siap pakai tanpa memerlukan konfigurasi tambahan.
+
