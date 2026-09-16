@@ -1,5 +1,5 @@
 Model,Skenario,R2 Score,MAE (Juta Rp),RMSE (Juta Rp),MAPE (%)
-Random Forest,Tanpa FE (Baseline),0.7343,1688.57,4932.39,28.78
-Random Forest,DENGAN Feature Engineering,0.7234,1671.34,5032.66,28.34
-XGBoost,Tanpa FE (Baseline),0.7572,1640.96,4715.32,28.28
-XGBoost,DENGAN Feature Engineering,0.766,1571.29,4628.49,26.52
+Random Forest,Tanpa FE (Baseline),0.8122,709.8,1189.1,25.67
+Random Forest,DENGAN Feature Engineering,0.8155,693.81,1178.45,24.87
+XGBoost,Tanpa FE (Baseline),0.8282,683.74,1137.29,23.76
+XGBoost,DENGAN Feature Engineering,0.8534,655.65,1050.53,23.16

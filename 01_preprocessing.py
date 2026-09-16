@@ -100,6 +100,37 @@ def map_text_to_kecamatan(text):
     return None
 
 
+def remove_outliers_iqr(df, columns=["harga", "luas_tanah", "luas_bangunan"]):
+    """Menghapus baris outlier menggunakan metode Interquartile Range (IQR)."""
+    n_before = len(df)
+    print("\n--- Tahap 4: Outlier Removal Menggunakan Metode Interquartile Range (IQR) ---")
+    print(f"Jumlah baris sebelum outlier removal: {n_before}")
+
+    outlier_mask = pd.Series(False, index=df.index)
+
+    for col in columns:
+        q1 = df[col].quantile(0.25)
+        q3 = df[col].quantile(0.75)
+        iqr = q3 - q1
+        lower_bound = q1 - (1.5 * iqr)
+        upper_bound = q3 + (1.5 * iqr)
+
+        is_col_outlier = (df[col] < lower_bound) | (df[col] > upper_bound)
+        count_outlier = is_col_outlier.sum()
+        print(f"Outlier removal pada kolom {col}: {count_outlier} baris dihapus dari total {n_before} baris "
+              f"(Q1={q1:,.0f}, Q3={q3:,.0f}, IQR={iqr:,.0f}, Batas Bawah={lower_bound:,.0f}, Batas Atas={upper_bound:,.0f})")
+
+        outlier_mask = outlier_mask | is_col_outlier
+
+    df_cleaned = df[~outlier_mask].copy()
+    n_after = len(df_cleaned)
+    total_removed = n_before - n_after
+    print(f"Jumlah baris sesudah outlier removal: {n_after}")
+    print(f"Total baris outlier yang dihapus: {total_removed} baris\n")
+
+    return df_cleaned
+
+
 def run_preprocessing():
     """Menggabungkan data, melakukan pembersihan, dan menghitung fitur rekayasa."""
     # --- Tahap 1: Load dan gabungkan data mentah Rumah123 dan broker developer ---
@@ -107,22 +138,32 @@ def run_preprocessing():
     df_broker = pd.read_csv(os.path.join(DATA_DIR, "data_broker_surabaya_raw.csv"))
 
     df = pd.concat([df_scrape, df_broker], ignore_index=True)
-    df = df.drop_duplicates(subset=["url_listing"])
+    print(f"Tahap 1: Load data mentah selesai. Total gabungan: {len(df)} baris.")
 
-    # --- Tahap 2: Data cleaning dan filtering anomali (harga wajar dan luas fisik) ---
-    df = df[(df["harga"] >= 150_000_000) & (df["harga"] <= 100_000_000_000)]
-    df = df[(df["luas_tanah"] >= 20.0) & (df["luas_tanah"] <= 5000.0)]
-    df = df[(df["luas_bangunan"] >= 20.0) & (df["luas_bangunan"] <= 5000.0)]
+    # --- Tahap 2: Hapus duplikat berdasarkan url_listing ---
+    n_before_dup = len(df)
+    df = df.drop_duplicates(subset=["url_listing"]).copy()
+    print(f"Tahap 2: Hapus duplikat selesai. {n_before_dup - len(df)} duplikat dihapus, tersisa {len(df)} baris.")
 
-    df["kamar_tidur"] = df["kamar_tidur"].fillna(2).astype(int)
-    df["kamar_mandi"] = df["kamar_mandi"].fillna(1).astype(int)
-    df = df[(df["kamar_tidur"] >= 1) & (df["kamar_mandi"] >= 1)]
+    # --- Tahap 3: Missing value imputation (median untuk numerik, modus untuk furnished) ---
+    print("\n--- Tahap 3: Missing Value Imputation ---")
+    numeric_cols = ["kamar_tidur", "kamar_mandi", "lantai", "carport"]
+    for col in numeric_cols:
+        med_val = int(round(df[col].median()))
+        null_count = df[col].isna().sum()
+        df[col] = df[col].fillna(med_val).astype(int)
+        print(f"Median {col} yang dipakai: {med_val} (mengisi {null_count} nilai kosong)")
 
-    df["lantai"] = df["lantai"].fillna(1).astype(int)
-    df["carport"] = df["carport"].fillna(1).astype(int)
-    df["furnished"] = df["furnished"].fillna("Unfurnished")
+    mode_furnished = df["furnished"].mode()[0]
+    null_fur_count = df["furnished"].isna().sum()
+    df["furnished"] = df["furnished"].fillna(mode_furnished)
+    print(f"Modus furnished yang dipakai: {mode_furnished} (mengisi {null_fur_count} nilai kosong)")
 
-    # --- Tahap 3 (FE 1): Pemetaan dan standardisasi ke 31 kecamatan resmi Surabaya ---
+    # --- Tahap 4: Outlier removal dengan IQR pada harga, luas_tanah, luas_bangunan ---
+    df = remove_outliers_iqr(df, columns=["harga", "luas_tanah", "luas_bangunan"])
+
+    # --- Tahap 5: Feature engineering ---
+    # FE 1: Pemetaan dan standardisasi ke 31 kecamatan resmi Surabaya
     kecamatan_list = []
     for _, row in df.iterrows():
         kec = map_text_to_kecamatan(f"{row['alamat_teks']} {row['judul_listing']}")
@@ -131,13 +172,13 @@ def run_preprocessing():
         kecamatan_list.append(kec or "Sukolilo")
     df["kecamatan"] = kecamatan_list
 
-    # --- Tahap 4 (FE 2): Pembuatan fitur rasio luas bangunan terhadap luas tanah ---
+    # FE 2: Rasio luas bangunan terhadap luas tanah
     df["rasio_bangunan_tanah"] = (df["luas_bangunan"] / df["luas_tanah"]).round(2)
 
-    # --- Tahap 5 (FE 3): Pembuatan fitur total ruangan inti (kamar tidur + kamar mandi) ---
+    # FE 3: Total ruangan inti (kamar tidur + kamar mandi)
     df["total_ruangan"] = df["kamar_tidur"] + df["kamar_mandi"]
 
-    # --- Tahap 6 (FE 4): Pembuatan fitur jarak ke pusat kota Surabaya (rumus Haversine) ---
+    # FE 4: Jarak ke pusat kota Surabaya (rumus Haversine)
     jarak_list = []
     for _, row in df.iterrows():
         lat, lon, kec = row["latitude"], row["longitude"], row["kecamatan"]
@@ -149,15 +190,15 @@ def run_preprocessing():
         jarak_list.append(d)
     df["jarak_ke_pusat_kota"] = jarak_list
 
-    # --- Tahap 7: Ekspor dataset baseline tanpa feature engineering (15 kolom) ---
+    # --- Tahap 6: Simpan dataset ---
     cols_tanpa = [
         "judul_listing", "harga", "luas_tanah", "luas_bangunan", "kamar_tidur",
         "kamar_mandi", "lantai", "carport", "furnished", "keamanan", "taman",
         "latitude", "longitude", "alamat_teks", "sumber_data"
     ]
-    df[cols_tanpa].to_csv(os.path.join(DATA_DIR, "dataset_tanpa_fe.csv"), index=False)
+    df_tanpa = df[cols_tanpa].copy()
+    df_tanpa.to_csv(os.path.join(DATA_DIR, "dataset_tanpa_fe.csv"), index=False)
 
-    # --- Tahap 8: Ekspor dataset lengkap dengan feature engineering (19 kolom) ---
     cols_dengan = [
         "judul_listing", "harga", "luas_tanah", "luas_bangunan", "kamar_tidur",
         "kamar_mandi", "lantai", "carport", "furnished", "keamanan", "taman",
@@ -181,6 +222,18 @@ def run_preprocessing():
     with open(os.path.join(DATA_DIR, "metadata_kecamatan.json"), "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
+    # --- Ringkasan Akhir Preprocessing ---
+    print("=" * 60)
+    print("RINGKASAN AKHIR PREPROCESSING")
+    print("=" * 60)
+    print(f"Jumlah baris dataset final: {len(df)}")
+    print(f"Jumlah kolom dataset_tanpa_fe.csv: {df_tanpa.shape[1]} kolom")
+    print(f"Jumlah kolom dataset_dengan_fe.csv: {df_dengan.shape[1]} kolom")
+    print(f"Konsistensi jumlah baris: {len(df_tanpa) == len(df_dengan)} ({len(df_tanpa)} baris)")
+    print("\nRentang Nilai (Min - Max) setelah Outlier Removal:")
+    for col in ["harga", "luas_tanah", "luas_bangunan"]:
+        print(f"- {col}: Min = {df[col].min():,.0f} | Max = {df[col].max():,.0f}")
+    print("=" * 60)
     print(f"Preprocessing selesai. {len(df)} data bersih berhasil disimpan ke folder '{DATA_DIR}/'.")
     return df_dengan
 

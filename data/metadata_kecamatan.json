@@ -2,22 +2,22 @@
   "Tegalsari": {
     "latitude": -7.2721,
     "longitude": 112.7386,
-    "total_listings": 29,
-    "median_harga": 13000000000,
+    "total_listings": 14,
+    "median_harga": 9250000000,
     "jarak_ke_pusat_km": 2.2
   },
   "Simokerto": {
     "latitude": -7.2396,
     "longitude": 112.7533,
-    "total_listings": 5,
-    "median_harga": 3200000000,
+    "total_listings": 3,
+    "median_harga": 2900000000,
     "jarak_ke_pusat_km": 1.99
   },
   "Genteng": {
     "latitude": -7.2589,
     "longitude": 112.7483,
-    "total_listings": 24,
-    "median_harga": 7000000000,
+    "total_listings": 18,
+    "median_harga": 3450000000,
     "jarak_ke_pusat_km": 0.45
   },
   "Bubutan": {
@@ -30,8 +30,8 @@
   "Gubeng": {
     "latitude": -7.2798,
     "longitude": 112.7584,
-    "total_listings": 239,
-    "median_harga": 4300000000,
+    "total_listings": 202,
+    "median_harga": 3800000000,
     "jarak_ke_pusat_km": 2.58
   },
   "Gunung Anyar": {
@@ -44,36 +44,36 @@
   "Sukolilo": {
     "latitude": -7.2885,
     "longitude": 112.7845,
-    "total_listings": 230,
-    "median_harga": 3650000000,
+    "total_listings": 208,
+    "median_harga": 3200000000,
     "jarak_ke_pusat_km": 4.97
   },
   "Tambaksari": {
     "latitude": -7.2523,
     "longitude": 112.7661,
-    "total_listings": 68,
-    "median_harga": 1465000000,
+    "total_listings": 62,
+    "median_harga": 1300000000,
     "jarak_ke_pusat_km": 1.65
   },
   "Mulyorejo": {
     "latitude": -7.2655,
     "longitude": 112.7925,
-    "total_listings": 329,
-    "median_harga": 3490000000,
+    "total_listings": 315,
+    "median_harga": 3200000000,
     "jarak_ke_pusat_km": 4.54
   },
   "Rungkut": {
     "latitude": -7.3195,
     "longitude": 112.7758,
-    "total_listings": 448,
-    "median_harga": 1350000000,
+    "total_listings": 440,
+    "median_harga": 1300000000,
     "jarak_ke_pusat_km": 7.37
   },
   "Tenggilis Mejoyo": {
     "latitude": -7.3186,
     "longitude": 112.7583,
-    "total_listings": 96,
-    "median_harga": 2225000000,
+    "total_listings": 91,
+    "median_harga": 2150000000,
     "jarak_ke_pusat_km": 6.83
   },
   "Benowo": {
@@ -86,8 +86,8 @@
   "Pakal": {
     "latitude": -7.2425,
     "longitude": 112.6072,
-    "total_listings": 20,
-    "median_harga": 1175000000,
+    "total_listings": 22,
+    "median_harga": 1125000000,
     "jarak_ke_pusat_km": 16.07
   },
   "Asemrowo": {
@@ -100,8 +100,8 @@
   "Sukomanunggal": {
     "latitude": -7.2725,
     "longitude": 112.7086,
-    "total_listings": 46,
-    "median_harga": 3025000000,
+    "total_listings": 38,
+    "median_harga": 2375000000,
     "jarak_ke_pusat_km": 5.08
   },
   "Tandes": {
@@ -114,36 +114,36 @@
   "Sambikerep": {
     "latitude": -7.2798,
     "longitude": 112.6489,
-    "total_listings": 603,
-    "median_harga": 4250000000,
+    "total_listings": 552,
+    "median_harga": 3990000000,
     "jarak_ke_pusat_km": 11.65
   },
   "Lakarsantri": {
     "latitude": -7.3105,
     "longitude": 112.6472,
-    "total_listings": 47,
-    "median_harga": 1970000000,
+    "total_listings": 39,
+    "median_harga": 1490000000,
     "jarak_ke_pusat_km": 12.98
   },
   "Wonokromo": {
     "latitude": -7.2985,
     "longitude": 112.7381,
-    "total_listings": 79,
-    "median_harga": 15000000000,
+    "total_listings": 36,
+    "median_harga": 2650000000,
     "jarak_ke_pusat_km": 4.81
   },
   "Wonocolo": {
     "latitude": -7.3182,
     "longitude": 112.7386,
-    "total_listings": 88,
-    "median_harga": 4050000000,
+    "total_listings": 72,
+    "median_harga": 3450000000,
     "jarak_ke_pusat_km": 6.91
   },
   "Wiyung": {
     "latitude": -7.3092,
     "longitude": 112.6845,
-    "total_listings": 422,
-    "median_harga": 2900000000,
+    "total_listings": 391,
+    "median_harga": 2800000000,
     "jarak_ke_pusat_km": 9.42
   },
   "Karangpilang": {
@@ -156,36 +156,36 @@
   "Jambangan": {
     "latitude": -7.3189,
     "longitude": 112.7167,
-    "total_listings": 51,
+    "total_listings": 50,
     "median_harga": 2200000000,
     "jarak_ke_pusat_km": 7.86
   },
   "Gayungan": {
     "latitude": -7.3328,
     "longitude": 112.7297,
-    "total_listings": 61,
-    "median_harga": 3090000000,
+    "total_listings": 55,
+    "median_harga": 2950000000,
     "jarak_ke_pusat_km": 8.73
   },
   "Dukuh Pakis": {
     "latitude": -7.2925,
     "longitude": 112.7025,
-    "total_listings": 196,
-    "median_harga": 6000000000,
+    "total_listings": 139,
+    "median_harga": 3750000000,
     "jarak_ke_pusat_km": 6.71
   },
   "Sawahan": {
     "latitude": -7.2789,
     "longitude": 112.7228,
-    "total_listings": 156,
-    "median_harga": 3000000000,
+    "total_listings": 121,
+    "median_harga": 2350000000,
     "jarak_ke_pusat_km": 4.01
   },
   "Bulak": {
     "latitude": -7.2355,
     "longitude": 112.7981,
-    "total_listings": 84,
-    "median_harga": 1650000000,
+    "total_listings": 81,
+    "median_harga": 1600000000,
     "jarak_ke_pusat_km": 5.63
   },
   "Kenjeran": {
@@ -205,8 +205,8 @@
   "Pabean Cantian": {
     "latitude": -7.2285,
     "longitude": 112.7386,
-    "total_listings": 6,
-    "median_harga": 1757500000,
+    "total_listings": 4,
+    "median_harga": 625000000,
     "jarak_ke_pusat_km": 3.55
   },
   "Krembangan": {

@@ -1,47 +1,47 @@
 Fitur,Importance
-luas_tanah,0.16857745
-luas_bangunan,0.1341173
-kamar_mandi,0.0930809
-total_ruangan,0.0542946
-kecamatan_Asemrowo,0.0467593
-kecamatan_Pakal,0.034621626
-kecamatan_Mulyorejo,0.028892908
-kecamatan_Rungkut,0.025663745
-kecamatan_Tenggilis Mejoyo,0.024581686
-kecamatan_Wonokromo,0.018798359
-kecamatan_Simokerto,0.018652862
-furnished_Unfurnished,0.017267292
-kecamatan_Tegalsari,0.016991157
-kecamatan_Sambikerep,0.015978523
-lantai,0.015967282
-kecamatan_Sawahan,0.014612033
-longitude,0.014470265
-jarak_ke_pusat_kota,0.013859016
-latitude,0.013306829
-kecamatan_Dukuh Pakis,0.012716001
-kecamatan_Bulak,0.012542167
-carport,0.012273264
-kecamatan_Gubeng,0.011897262
-kecamatan_Karangpilang,0.011751421
-kecamatan_Tandes,0.011432089
-kecamatan_Tambaksari,0.011089312
-kecamatan_Gunung Anyar,0.010741409
-kecamatan_Benowo,0.010458068
-keamanan,0.010404818
-kecamatan_Genteng,0.010150919
-rasio_bangunan_tanah,0.010052559
-furnished_Furnished,0.009812793
-kecamatan_Jambangan,0.009662717
-kecamatan_Pabean Cantian,0.009144874
-kecamatan_Sukomanunggal,0.008959202
-kecamatan_Wiyung,0.008237263
-kecamatan_Wonocolo,0.007957882
-kecamatan_Lakarsantri,0.007892774
-kamar_tidur,0.007425278
-taman,0.0061937235
-kecamatan_Sukolilo,0.005741502
-kecamatan_Gayungan,0.0051752217
-furnished_Semi Furnished,0.004996524
-kecamatan_Kenjeran,0.0027978523
+luas_bangunan,0.18003875
+kamar_mandi,0.09141699
+luas_tanah,0.08595313
+kecamatan_Rungkut,0.04631364
+total_ruangan,0.041968968
+kecamatan_Mulyorejo,0.037123606
+kecamatan_Benowo,0.029617835
+lantai,0.029369636
+kecamatan_Asemrowo,0.029288495
+kecamatan_Gubeng,0.026926495
+kecamatan_Sambikerep,0.026276663
+kecamatan_Tenggilis Mejoyo,0.025553467
+jarak_ke_pusat_kota,0.021522224
+kecamatan_Pakal,0.01981417
+latitude,0.017719345
+kecamatan_Tambaksari,0.01762221
+kecamatan_Tegalsari,0.017353125
+rasio_bangunan_tanah,0.015649967
+longitude,0.015318397
+furnished_Unfurnished,0.01484463
+kecamatan_Karangpilang,0.012872504
+kecamatan_Wonokromo,0.012562836
+keamanan,0.012322141
+furnished_Furnished,0.012210083
+kecamatan_Jambangan,0.012160409
+kecamatan_Sukomanunggal,0.012150607
+kecamatan_Kenjeran,0.012056999
+taman,0.0113634495
+carport,0.009994599
+kecamatan_Bulak,0.0096908845
+kecamatan_Sawahan,0.0090718595
+kecamatan_Genteng,0.00900415
+kamar_tidur,0.008941462
+kecamatan_Wiyung,0.007800159
+kecamatan_Dukuh Pakis,0.0072086616
+kecamatan_Sukolilo,0.0066925446
+kecamatan_Gunung Anyar,0.006631669
+kecamatan_Lakarsantri,0.0057562804
+kecamatan_Pabean Cantian,0.005682064
+furnished_Semi Furnished,0.0047670077
+kecamatan_Bubutan,0.004524573
+kecamatan_Tandes,0.0043338733
+kecamatan_Gayungan,0.0042662565
+kecamatan_Wonocolo,0.0042638835
+kecamatan_Simokerto,0.003979331
 kecamatan_Krembangan,0.0
-kecamatan_Bubutan,0.0
