@@ -1,3 +1,8 @@
+"""Ambil listing unik dari lima wilayah dengan kuota yang seimbang.
+
+CSV mentah mempertahankan atribut sumber; wilayah_scraping hanya label audit.
+Pembersihan lelang, lokasi luar kota, dan outlier dilakukan di preprocessing.
+"""
 import argparse
 from datetime import datetime
 import json
@@ -10,11 +15,11 @@ import time
 
 import pandas as pd
 from playwright.sync_api import sync_playwright
-from playwright_stealth import Stealth
 
 if sys.platform == "win32":
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,7 +28,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("ScraperRumah123")
 
-BASE_URL = "https://www.rumah123.com/jual/surabaya/rumah/"
 SOURCE_TAG = "rumah123"
 
 # --- Setup konfigurasi dan schema kolom data ---
@@ -43,7 +47,8 @@ CSV_COLUMNS = [
     "latitude",
     "longitude",
     "url_listing",
-    "sumber_data"
+    "sumber_data",
+    "wilayah_scraping"
 ]
 
 
@@ -66,16 +71,23 @@ def parse_price(price_obj):
     if not display:
         return None
 
-    cleaned = display.replace("Rp", "").replace(".", "").replace(",", ".").strip()
-    match = re.search(r"([\d\.]+)\s*(miliar|m|juta|jt)?", cleaned, re.IGNORECASE)
+    match = re.search(r'([\d.,]+)\s*(miliar|milyar|m|juta|jt)?', display, re.I)
     if match:
-        num = float(match.group(1))
-        unit = (match.group(2) or "").lower()
-        if "miliar" in unit or unit == "m":
-            return int(num * 1_000_000_000)
-        elif "juta" in unit or unit == "jt":
-            return int(num * 1_000_000)
-        return int(num)
+        number = match.group(1)
+        unit = (match.group(2) or '').lower()
+        if unit:
+            if ',' in number:
+                number = number.replace('.', '').replace(',', '.')
+            elif re.fullmatch(r'\d{1,3}(?:\.\d{3})+', number):
+                number = number.replace('.', '')
+        else:
+            number = number.replace('.', '').replace(',', '')
+        try:
+            value = float(number)
+        except ValueError:
+            return None
+        multiplier = 1_000_000_000 if unit in ('miliar', 'milyar', 'm') else 1_000_000 if unit else 1
+        return int(value * multiplier)
     return None
 
 
@@ -143,7 +155,7 @@ def extract_listings_from_rsc(html):
     full_stream = ""
     for m in matches:
         try:
-            full_stream += m.encode("utf-8").decode("unicode_escape")
+            full_stream += json.loads('"' + m + '"')
         except Exception:
             full_stream += m
 
@@ -209,9 +221,9 @@ def process_listing(item):
 
     locations = item.get("locations") or []
     address_parts = [loc.get("name") for loc in locations if isinstance(loc, dict) and loc.get("name")]
-    alamat_teks = ", ".join(dict.fromkeys(address_parts)) if address_parts else (item.get("address") or "Surabaya")
+    alamat_teks = (item.get("location") or {}).get("text") or (", ".join(dict.fromkeys(address_parts)) if address_parts else (item.get("address") or "Surabaya"))
 
-    coord = item.get("coordinate") or {}
+    coord = item.get("locationPin") or item.get("coordinate") or {}
     row = {
         "judul_listing": (item.get("title") or "").strip(),
         "harga": harga,
@@ -221,7 +233,7 @@ def process_listing(item):
         "kamar_mandi": parse_int_safe(attrs.get("bathrooms")),
         "lantai": parse_int_safe(attrs.get("floors") or attrs.get("tier")),
         "carport": parse_int_safe(attrs.get("carports") or attrs.get("garages")),
-        "furnished": str(furnished_val).strip() if furnished_val else "Unfurnished",
+        "furnished": str(furnished_val).strip() if furnished_val else None,
         "keamanan": check_boolean_facility(item, ["keamanan", "security", "satpam", "one gate", "cctv", "24 jam"]),
         "taman": check_boolean_facility(item, ["taman", "garden", "halaman", "backyard"]),
         "alamat_teks": alamat_teks,
@@ -233,135 +245,125 @@ def process_listing(item):
     return row, None
 
 
-def run_scraper(target_count=3500, delay_min=3.5, delay_max=6.5, headless=True):
-    """Menjalankan bot browser dengan modul stealth untuk scraping listing Rumah123."""
-    os.makedirs("data", exist_ok=True)
-    today_str = datetime.now().strftime("%Y-%m-%d")
-    output_csv = os.path.join("data", f"rumah123_surabaya_raw_{today_str}.csv")
+# Pembagian resmi: https://jdih.surabaya.go.id/peraturan/download/4588
+REGIONS = {
+    'Surabaya Timur': ['Gubeng', 'Gunung Anyar', 'Sukolilo', 'Tambaksari', 'Mulyorejo', 'Rungkut', 'Tenggilis Mejoyo'],
+    'Surabaya Barat': ['Benowo', 'Pakal', 'Asemrowo', 'Sukomanunggal', 'Tandes', 'Sambikerep', 'Lakarsantri'],
+    'Surabaya Utara': ['Bulak', 'Kenjeran', 'Semampir', 'Pabean Cantian', 'Krembangan'],
+    'Surabaya Selatan': ['Wonokromo', 'Wonocolo', 'Wiyung', 'Karangpilang', 'Jambangan', 'Gayungan', 'Dukuh Pakis', 'Sawahan'],
+    'Surabaya Pusat': ['Tegalsari', 'Simokerto', 'Genteng', 'Bubutan'],
+}
 
+
+def search_url(district, page_number):
+    slug = district.lower().replace(' ', '-')
+    if district == 'Gunung Anyar':
+        slug = 'gununganyar'
+    if district == 'Pabean Cantian':
+        slug = 'pabean-cantikan'
+    return f'https://www.rumah123.com/jual/surabaya/{slug}/rumah/?page={page_number}'
+
+
+def run_scraper(target_count=4000, delay_min=3.5, delay_max=6.5, headless=True,
+                max_pages=250):
+    if target_count < 5 or not 0 <= delay_min <= delay_max or max_pages < 1:
+        raise ValueError('Target minimal 5, delay valid, max_pages minimal 1.')
+    os.makedirs('data', exist_ok=True)
+    output_csv = os.path.join('data', f'rumah123_surabaya_raw_{datetime.now():%Y-%m-%d}_balanced.csv')
+    quotas = {r: target_count // 5 + (i < target_count % 5) for i, r in enumerate(REGIONS)}
+    counts = dict.fromkeys(REGIONS, 0)
     seen_urls = set()
-    total_valid = 0
-
     if os.path.exists(output_csv):
-        try:
-            existing_df = pd.read_csv(output_csv)
-            if "url_listing" in existing_df.columns:
-                seen_urls = set(existing_df["url_listing"].dropna().tolist())
-                total_valid = len(existing_df)
-                logger.info(f"Melanjutkan dari {total_valid} data yang sudah tersimpan di {output_csv}")
-        except Exception as e:
-            logger.warning(f"Gagal membaca file eksisting: {e}")
-
-    if total_valid >= target_count:
-        logger.info(f"Target {target_count} data sudah terpenuhi.")
-        return output_csv
-
-    current_page = (total_valid // 20) + 1
-    max_pages = 250
-    consecutive_empty = 0
-
-    stealth = Stealth()
-
-    # --- Setup browser Playwright dengan modul stealth ---
-    with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=headless,
-            args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"]
-        )
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-            viewport={"width": 1366, "height": 768},
-            locale="id-ID"
-        )
-        page = context.new_page()
-        stealth.apply_stealth_sync(page)
-
-        try:
-            # --- Loop scraping per halaman dan ekstraksi listing ---
-            while total_valid < target_count and current_page <= max_pages:
-                page_url = f"{BASE_URL}?page={current_page}"
-                logger.info(f"Memproses halaman {current_page}: {page_url}")
-
-                try:
-                    response = page.goto(page_url, timeout=45000, wait_until="domcontentloaded")
-                except Exception as e:
-                    logger.warning(f"Percobaan 1 gagal ({e}), mencoba kembali...")
-                    time.sleep(3)
-                    try:
-                        response = page.goto(page_url, timeout=60000, wait_until="domcontentloaded")
-                    except Exception as e2:
-                        logger.error(f"Halaman {current_page} dilewati karena timeout: {e2}")
-                        current_page += 1
-                        continue
-
-                status = response.status if response else 0
-                title = (page.title() or "").lower()
-
-                if status in (403, 429) or any(w in title for w in ["just a moment", "captcha", "challenge"]):
-                    logger.critical("Proteksi bot terdeteksi. Proses dihentikan demi keamanan.")
-                    break
-
-                raw_listings = extract_listings_from_rsc(page.content())
-                if not raw_listings:
-                    consecutive_empty += 1
-                    if consecutive_empty >= 5:
-                        logger.info("Listing tidak lagi ditemukan pada 5 halaman beruntun. Selesai.")
+        existing = pd.read_csv(output_csv)
+        if list(existing.columns) != CSV_COLUMNS or not existing['wilayah_scraping'].isin(REGIONS).all():
+            raise ValueError('Schema/label wilayah CSV resume tidak valid.')
+        seen_urls.update(existing['url_listing'].dropna())
+        counts.update(existing['wilayah_scraping'].value_counts().to_dict())
+        if any(counts[r] > quotas[r] for r in REGIONS):
+            raise ValueError('Target lebih kecil dari data resume; gunakan target sebelumnya atau lebih besar.')
+    else:
+        pd.DataFrame(columns=CSV_COLUMNS).to_csv(output_csv, index=False)
+    # Round-robin halaman antar wilayah DAN kecamatan agar satu kompleks tidak menghabiskan kuota.
+    cursors = {(r, d): 1 for r, ds in REGIONS.items() for d in ds}
+    empty = dict.fromkeys(cursors, 0)
+    stopped = False
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=headless)
+            context = browser.new_context(locale='id-ID', viewport={'width': 1366, 'height': 768})
+            page = context.new_page()
+            try:
+                while any(counts[r] < quotas[r] for r in REGIONS) and not stopped:
+                    attempted = False
+                    for slot in range(max(map(len, REGIONS.values()))):
+                        for region, districts in REGIONS.items():
+                            if stopped or counts[region] >= quotas[region] or slot >= len(districts):
+                                continue
+                            district = districts[slot]
+                            key = (region, district)
+                            if cursors[key] > max_pages or empty[key] >= 3:
+                                continue
+                            attempted = True
+                            url = search_url(district, cursors[key])
+                            logger.info('%s | %s | %s', region, district, url)
+                            try:
+                                response = page.goto(url, timeout=60000, wait_until='domcontentloaded')
+                                title = page.title().lower()
+                                status = response.status if response else 0
+                                if status in (403, 429) or any(w in title for w in ['just a moment', 'captcha', 'challenge']):
+                                    logger.error('Akses dibatasi situs; scraping dihentikan. Kuota belum tentu terpenuhi.')
+                                    stopped = True
+                                    break
+                                if status != 200 or '/jual/surabaya/' not in page.url or district.lower().split()[0] not in title:
+                                    logger.warning('Halaman tidak cocok/HTTP %s: %s', status, page.url)
+                                    empty[key] += 1
+                                    cursors[key] += 1
+                                    continue
+                                raw = extract_listings_from_rsc(page.content())
+                                rows = []
+                                for item in raw:
+                                    row, _ = process_listing(item)
+                                    if row is None or row['url_listing'] in seen_urls:
+                                        continue
+                                    row['wilayah_scraping'] = region
+                                    rows.append(row)
+                                    seen_urls.add(row['url_listing'])
+                                    counts[region] += 1
+                                    if counts[region] >= quotas[region]:
+                                        break
+                                if rows:
+                                    pd.DataFrame(rows)[CSV_COLUMNS].to_csv(output_csv, mode='a', header=False, index=False)
+                                empty[key] = 0 if raw else empty[key] + 1
+                                logger.info('%s: %d/%d (+%d)', region, counts[region], quotas[region], len(rows))
+                            except Exception:
+                                logger.exception('Gagal mengambil %s', url)
+                                empty[key] += 1
+                            cursors[key] += 1
+                            time.sleep(random.uniform(delay_min, delay_max))
+                    if not attempted:
                         break
-                    current_page += 1
-                    time.sleep(random.uniform(delay_min, delay_max))
-                    continue
-
-                consecutive_empty = 0
-                page_rows = []
-
-                for raw_item in raw_listings:
-                    row, _ = process_listing(raw_item)
-                    if not row or row["url_listing"] in seen_urls:
-                        continue
-
-                    seen_urls.add(row["url_listing"])
-                    page_rows.append(row)
-                    total_valid += 1
-                    if total_valid >= target_count:
-                        break
-
-                # --- Penyimpanan hasil scraping secara bertahap ke CSV ---
-                if page_rows:
-                    batch_df = pd.DataFrame(page_rows)[CSV_COLUMNS]
-                    file_exists = os.path.exists(output_csv)
-                    batch_df.to_csv(
-                        output_csv,
-                        mode="a" if file_exists else "w",
-                        header=not file_exists,
-                        index=False,
-                        encoding="utf-8"
-                    )
-
-                logger.info(f"Halaman {current_page} selesai (+{len(page_rows)} data). Total: {total_valid}/{target_count}")
-                if total_valid >= target_count:
-                    break
-
-                current_page += 1
-                time.sleep(random.uniform(delay_min, delay_max))
-
-        finally:
-            browser.close()
-
-    logger.info(f"Selesai. Total tersimpan: {total_valid} data di {output_csv}")
+            finally:
+                browser.close()
+    finally:
+        for region in REGIONS:
+            logger.info('HASIL %s: %d/%d (kekurangan %d)', region, counts[region], quotas[region], max(0, quotas[region]-counts[region]))
+        logger.info('CSV gabungan: %s', output_csv)
     return output_csv
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Scraper Listing Rumah123 Surabaya")
-    parser.add_argument("--target", type=int, default=3500, help="Jumlah target data")
+    parser.add_argument("--target", type=int, default=4000, help="Jumlah target data")
     parser.add_argument("--delay-min", type=float, default=3.5, help="Delay minimal (detik)")
     parser.add_argument("--delay-max", type=float, default=6.5, help="Delay maksimal (detik)")
     parser.add_argument("--no-headless", action="store_true", help="Jalankan browser dengan UI")
+    parser.add_argument("--max-pages", type=int, default=250, help="Batas halaman per kecamatan")
     args = parser.parse_args()
 
     run_scraper(
         target_count=args.target,
         delay_min=args.delay_min,
         delay_max=args.delay_max,
-        headless=not args.no_headless
+        headless=not args.no_headless,
+        max_pages=args.max_pages
     )
